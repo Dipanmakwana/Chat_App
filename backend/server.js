@@ -7,6 +7,7 @@ const userRouter = require("./routes/userRouter");
 const chatRouter = require("./routes/chatRoutes");
 const messageRouter = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddelware");
+const path = require("path");
 
 connection();
 const app = express();
@@ -20,6 +21,21 @@ const PORT = process.env.PORT || 5000;
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
+
+// ------------------ Deployment ---------------
+
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV == "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("API Running Successfully.");
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);
